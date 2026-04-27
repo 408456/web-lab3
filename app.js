@@ -75,6 +75,22 @@ export default function appFactory(express, bodyParser, createReadStream, crypto
         });
     });
 
+    app.post('/size2json/', upload.single('image'), (req, res) => {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No image file provided. Use field name "image".' });
+        }
+
+        if (req.file.mimetype !== 'image/png') {
+            return res.status(400).json({ error: 'Only PNG images are allowed.' });
+        }
+        try {
+            const dimensions = sizeOf(req.file.buffer);
+            res.json({ width: dimensions.width, height: dimensions.height });
+        } catch (err) {
+            res.status(500).json({ error: 'Unable to parse image dimensions' });
+        }
+    });
+
     app.all('*', (req, res) => {
         res.send('408456');
     });
